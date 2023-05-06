@@ -12,7 +12,7 @@ namespace HR.LeaveManagement.Persistence.IntegrationTests
         public HeDatabaseContextTests()
         {
             var dbOptions = new DbContextOptionsBuilder<HrDatabaseContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
-            _hrDatabaseContext = new HrDatabaseContext(dbOptions);
+            //_hrDatabaseContext = new HrDatabaseContext(dbOptions);
         }
         [Fact]
         public async void Save_SetDateCreatedValue()

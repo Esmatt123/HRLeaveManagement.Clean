@@ -5,8 +5,10 @@ using HR.LeaveManagement.Application.Features.LeaveAllocations.Commands.UpdateLe
 using HR.LeaveManagement.Application.Features.LeaveRequest.Commands.CancelLeaveRequest;
 using HR.LeaveManagement.Application.Features.LeaveRequest.Commands.ChangeLeaveRequestApproval;
 using HR.LeaveManagement.Application.Features.LeaveRequest.Commands.DeleteLeaveRequest;
+using HR.LeaveManagement.Application.Features.LeaveRequest.Commands.UpdateLeaveRequest;
 using HR.LeaveManagement.Application.Features.LeaveRequest.Queries.GetLeaveRequestDetail;
 using HR.LeaveManagement.Application.Features.LeaveRequest.Queries.GetLeaveRequestList;
+using HR.LeaveManagement.Application.Features.LeaveRequests.Requests.Commands;
 using HR.LeaveManagement.Application.Features.LeaveType.Command.DeleteLeaveType;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -48,7 +50,7 @@ namespace HR.LeaveManagement.Api.Controllers
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> Post(CreateLeaveAllocationCommand leaveRequest)
+        public async Task<ActionResult> Post(CreateLeaveRequestCommand leaveRequest)
         {
             var response = await _mediator.Send(leaveRequest);
             return CreatedAtAction(nameof(Get), new { id = response });
@@ -60,7 +62,7 @@ namespace HR.LeaveManagement.Api.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesDefaultResponseType]
-        public async Task<ActionResult> Put(UpdateLeaveAllocationCommand leaveRequest)
+        public async Task<ActionResult> Put(UpdateLeaveRequestCommand leaveRequest)
         {
             await _mediator.Send(leaveRequest);
             return NoContent();

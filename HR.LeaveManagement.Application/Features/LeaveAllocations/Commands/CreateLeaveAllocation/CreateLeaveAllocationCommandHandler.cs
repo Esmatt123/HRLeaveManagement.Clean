@@ -3,6 +3,7 @@ using HR.LeaveManagement.Application.Contracts.Persistence;
 using HR.LeaveManagement.Application.DTOs.LeaveAllocation.Validators;
 using HR.LeaveManagement.Application.Exceptions;
 using HR.LeaveManagement.Application.Features.LeaveAllocations.Commands.CreateLeaveAllocation;
+using HR.LeaveManagement.Application.Identity;
 using MediatR;
 
 namespace HR.LeaveManagement.Application.Features.LeaveAllocations.Handlers.Commands
@@ -12,13 +13,15 @@ namespace HR.LeaveManagement.Application.Features.LeaveAllocations.Handlers.Comm
         private readonly IMapper _mapper;
         private readonly ILeaveAllocationRepository _leaveAllocationRepository;
         private readonly ILeaveTypeRepository _leaveTypeRepository;
+        private readonly IUserService _userService;
 
         public CreateLeaveAllocationCommandHandler(IMapper mapper,
-            ILeaveAllocationRepository leaveAllocationRepository, ILeaveTypeRepository leaveTypeRepository)
+            ILeaveAllocationRepository leaveAllocationRepository, ILeaveTypeRepository leaveTypeRepository, IUserService userService)
         {
             _mapper = mapper;
             this._leaveAllocationRepository = leaveAllocationRepository;
             this._leaveTypeRepository = leaveTypeRepository;
+            this._userService = userService;
         }
 
         public async Task<Unit> Handle(CreateLeaveAllocationCommand request, CancellationToken cancellationToken)
@@ -34,11 +37,35 @@ namespace HR.LeaveManagement.Application.Features.LeaveAllocations.Handlers.Comm
 
             // Get Employees
 
+            var employees = await _userService.GetEmployees();
+
             //Get Period
 
+            var period = DateTime.Now.Year;
+
+            var allocations = new List<Domain.LeaveAllocation>();
+            foreach (var emp in employees)
+            {
+                var allocationExists = await _leaveAllocationRepository.AllocationExists(emp.Id, request.LeaveTypeId, period);
+                if (allocationExists == false)
+                {
+                    allocations.Add(new Domain.LeaveAllocation
+                    {
+                        EmployeeId = emp.Id,
+                        LeaveTypeId = leaveType.Id,
+                        NumberOfDays = leaveType.DefaultDays,
+                        Period = period,
+                    });
+                }
+            }
+            if (allocations.Any())
+            {
+            await _leaveAllocationRepository.AddAllocations(allocations);
+            }
+            
+
             //Assign Allocations
-            var leaveAllocation = _mapper.Map<Domain.LeaveAllocation>(request);
-            await _leaveAllocationRepository.CreateAsync(leaveAllocation);
+           
             return Unit.Value;
         }
     }

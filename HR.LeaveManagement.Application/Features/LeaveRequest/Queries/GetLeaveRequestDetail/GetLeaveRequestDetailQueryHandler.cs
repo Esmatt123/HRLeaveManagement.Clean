@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using HR.LeaveManagement.Application.Contracts.Persistence;
+using HR.LeaveManagement.Application.Exceptions;
 using HR.LeaveManagement.Application.Features.LeaveRequest.Queries.GetLeaveRequestList;
+using HR.LeaveManagement.Application.Identity;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -14,11 +16,13 @@ namespace HR.LeaveManagement.Application.Features.LeaveRequest.Queries.GetLeaveR
     {
         private readonly ILeaveRequestRepository _leaveRequestRepository;
         private readonly IMapper _mapper;
+        private readonly IUserService _userService;
 
-        public GetLeaveRequestDetailQueryHandler(ILeaveRequestRepository leaveRequestRepository, IMapper mapper)
+        public GetLeaveRequestDetailQueryHandler(ILeaveRequestRepository leaveRequestRepository, IMapper mapper, IUserService userService)
         {
             this._leaveRequestRepository = leaveRequestRepository;
             this._mapper = mapper;
+            this._userService = userService;
         }
 
 
@@ -27,6 +31,12 @@ namespace HR.LeaveManagement.Application.Features.LeaveRequest.Queries.GetLeaveR
         {
             
             var leaveRequest = _mapper.Map<LeaveRequestDetailsDto>(await _leaveRequestRepository.GetLeaveRequestsWithDetails(request.Id));
+
+            if (leaveRequest == null)
+                throw new NotFoundException(nameof(LeaveRequest), request.Id);
+
+            // Add Employee details as needed
+            leaveRequest.Employee = await _userService.GetEmployee(leaveRequest.RequestingEmployeeId);
 
             return leaveRequest;
         }

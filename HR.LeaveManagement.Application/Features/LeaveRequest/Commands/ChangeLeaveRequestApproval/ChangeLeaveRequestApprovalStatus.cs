@@ -1,65 +1,70 @@
 ﻿using AutoMapper;
 using HR.LeaveManagement.Application.Contracts.Email;
-using HR.LeaveManagement.Application.Contracts.Logging;
 using HR.LeaveManagement.Application.Contracts.Persistence;
 using HR.LeaveManagement.Application.Exceptions;
-using HR.LeaveManagement.Application.Features.LeaveRequest.Commands.CancelLeaveRequest;
 using HR.LeaveManagement.Application.Models.Email;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace HR.LeaveManagement.Application.Features.LeaveRequest.Commands.ChangeLeaveRequestApproval
+namespace HR.LeaveManagement.Application.Features.LeaveRequest.Commands.ChangeLeaveRequestApproval;
+
+public class ChangeLeaveRequestApprovalCommandHandler : IRequestHandler<ChangeLeaveRequestApprovalCommand, Unit>
 {
-    public class ChangeLeaveRequestApprovalStatus
+    private readonly IMapper _mapper;
+    private readonly IEmailSender _emailSender;
+    private readonly ILeaveRequestRepository _leaveRequestRepository;
+    private readonly ILeaveTypeRepository _leaveTypeRepository;
+    private readonly ILeaveAllocationRepository _leaveAllocationRepository;
+
+    public ChangeLeaveRequestApprovalCommandHandler(
+         ILeaveRequestRepository leaveRequestRepository,
+         ILeaveTypeRepository leaveTypeRepository,
+         ILeaveAllocationRepository leaveAllocationRepository,
+         IMapper mapper,
+         IEmailSender emailSender)
     {
-        private readonly ILeaveRequestRepository _leaveRequestRepository;
-        private readonly IEmailSender _emailSender;
-        private readonly IAppLogger<CancelLeaveRequestCommandHandler> _logger;
-        private readonly ILeaveTypeRepository _leaveTypeRepository;
-        private readonly IMapper _mapper;
+        _leaveRequestRepository = leaveRequestRepository;
+        _leaveTypeRepository = leaveTypeRepository;
+        this._leaveAllocationRepository = leaveAllocationRepository;
+        _mapper = mapper;
+        this._emailSender = emailSender;
+    }
 
-        public ChangeLeaveRequestApprovalStatus(ILeaveRequestRepository leaveRequestRepository, IEmailSender emailSender, IAppLogger<CancelLeaveRequestCommandHandler> logger, ILeaveTypeRepository leaveTypeRepository,IMapper mapper )
+    public async Task<Unit> Handle(ChangeLeaveRequestApprovalCommand request, CancellationToken cancellationToken)
+    {
+        var leaveRequest = await _leaveRequestRepository.GetByIdAsync(request.Id);
+
+        if (leaveRequest is null)
+            throw new NotFoundException(nameof(LeaveRequest), request.Id);
+
+        leaveRequest.Approved = request.Approved;
+        await _leaveRequestRepository.UpdateAsync(leaveRequest);
+
+        // if request is approved, get and update the employee's allocations
+        if (request.Approved)
         {
-            this._leaveRequestRepository = leaveRequestRepository;
-            this._emailSender = emailSender;
-            this._logger = logger;
-            this._leaveTypeRepository = leaveTypeRepository;
-            this._mapper = mapper;
+            int daysRequested = (int)(leaveRequest.EndDate - leaveRequest.StartDate).TotalDays;
+            var allocation = await _leaveAllocationRepository.GetUserAllocations(leaveRequest.RequestingEmployeeId, leaveRequest.LeaveTypeId);
+            allocation.NumberOfDays -= daysRequested;
+
+            await _leaveAllocationRepository.UpdateAsync(allocation);
         }
 
-        public async Task<Unit> Handle(ChangeLeaveRequestApprovalCommand request, CancellationToken cancellationToken)
+        // send confirmation email
+        try
         {
-            var leaveRequest = await _leaveRequestRepository.GetByIdAsync(request.Id);
-
-            if (leaveRequest is null)
-                throw new NotFoundException(nameof(LeaveRequest), request.Id);
-
-            leaveRequest.Approved = request.Approved;
-
-            await _leaveRequestRepository.UpdateAsync(leaveRequest);
-
-
-
-            try
+            var email = new EmailMessage
             {
-                var email = new EmailMessage
-                {
-                    To = string.Empty,
-                    Body = $"Your leave request for {leaveRequest.StartDate:D} to {leaveRequest.EndDate:D} " +
-                                       $"has been cancelled successfully.",
-                    Subject = "Leave Request Submitted"
-                };
-                await _emailSender.SendEmail(email);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex.Message);
-            }
-            return Unit.Value;
+                To = string.Empty, /* Get email from employee record */
+                Body = $"The approval status for your leave request for {leaveRequest.StartDate:D} to {leaveRequest.EndDate:D} has been updated.",
+                Subject = "Leave Request Approval Status Updated"
+            };
+            await _emailSender.SendEmail(email);
         }
+        catch (Exception)
+        {
+            // log error
+        }
+
+        return Unit.Value;
     }
 }
