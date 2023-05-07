@@ -21,8 +21,8 @@ builder.Services.AddHttpClient<IClient, Client>(client => client.BaseAddress = n
     .AddHttpMessageHandler<JwtAuthorizationMessageHandler>(); ;
 
 builder.Services.AddBlazoredToast();
-builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
+builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<ApiAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
 

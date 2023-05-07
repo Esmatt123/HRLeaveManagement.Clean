@@ -5,6 +5,43 @@ using HR.LeaveManagement.BlazorUI.Models.LeaveAllocations;
 using HR.LeaveManagement.BlazorUI.Models.LeaveRequests;
 using HR.LeaveManagement.BlazorUI.Services.Base;
 
+/*
+ This code defines the LeaveRequestService class, which is a service responsible for handling leave request-related operations in a Blazor UI application. Here's an overview of what this code does:
+
+- The class LeaveRequestService is declared and implements the ILeaveRequestService interface.
+
+- It inherits from the BaseHttpService class, which likely provides common functionality for making HTTP requests.
+
+- The IMapper and ILocalStorageService dependencies are injected into the constructor via dependency injection.
+
+- The class contains several methods that interact with the server-side API to perform various operations related to leave requests:
+
+- ApproveLeaveRequest: Sends a request to update the approval status of a leave request.
+
+- CancelLeaveRequest: Sends a request to cancel a leave request.
+
+- CreateLeaveRequest: Sends a request to create a new leave request.
+
+- DeleteLeaveRequest: Throws a NotImplementedException since it is not implemented.
+
+- GetAdminLeaveRequestList: Retrieves a list of leave requests for the admin view and returns a view model.
+
+- GetLeaveRequest: Retrieves a specific leave request by its ID and returns a view model.
+
+- GetUserLeaveRequests: Retrieves leave requests and allocations for the logged-in user and returns a view model.
+
+- The methods use the injected dependencies, such as IMapper, to map the server-side response objects to the corresponding view models.
+
+- The methods handle exceptions and convert them into appropriate response objects.
+
+- The service interacts with the server-side API by making asynchronous HTTP requests using the injected IClient instance.
+
+
+Overall, the LeaveRequestService encapsulates the logic for handling leave request-related operations, including creating, 
+updating, canceling, and retrieving leave requests, and provides data in the form of view models to be consumed by the Blazor 
+UI components.
+ */
+
 namespace HR.LeaveManagement.BlazorUI.Services
 {
     public class LeaveRequestService : BaseHttpService, ILeaveRequestService

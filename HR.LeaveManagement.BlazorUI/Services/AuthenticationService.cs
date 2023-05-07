@@ -5,6 +5,27 @@ using HR.LeaveManagement.BlazorUI.Services.Base;
 using Microsoft.AspNetCore.Components.Authorization;
 using System;
 
+/*
+This code defines a service called AuthenticationService that is responsible for handling user authentication 
+and registration in a Blazor application.
+
+The service has a dependency on an AuthenticationStateProvider, which is used to manage the 
+authentication state of the application.
+
+The AuthenticateAsync method is used to authenticate a user by sending a login request to the server 
+with the provided email and password. If the authentication is successful, the received authentication 
+token is saved in local storage, and the user's login state is set in the Blazor application.
+
+The Logout method is used to log out the user by removing the user's claims in the Blazor application 
+and invalidating the login state.
+
+The RegisterAsync method is used to register a new user by sending a registration request to the server 
+with the provided user details. If the registration is successful, it returns true; otherwise, it returns false.
+
+- IAuthenticationService is an interface that defines a contract for an authentication service in a Blazor application. 
+It specifies the methods and operations that the authentication service should implement.
+ */
+
 namespace HR.LeaveManagement.BlazorUI.Services
 {
     public class AuthenticationService : BaseHttpService, IAuthenticationService

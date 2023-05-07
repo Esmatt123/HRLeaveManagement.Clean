@@ -1,7 +1,5 @@
-﻿@using Microsoft.AspNetCore.Authorization;
-@using Microsoft.AspNetCore.Components.Authorization
-
-@attribute [Authorize(Roles ="Administrator")]
+﻿@page "/leavetypes/create/"
+@attribute [Authorize(Roles = "Administrator")]
 <h3>Create Leave Type</h3>
 
 @if (string.IsNullOrEmpty(Message) == false)

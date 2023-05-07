@@ -5,7 +5,42 @@ using HR.LeaveManagement.Application.Features.LeaveAllocations.Commands.UpdateLe
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+/*
+ //--- This code represents a controller class in an ASP.NET Core API for managing leave allocations. 
+It handles various HTTP requests related to leave allocations, including getting a list of leave allocations, 
+getting details of a specific leave allocation, creating a new leave allocation, updating an existing leave allocation, 
+and deleting a leave allocation. The controller uses MediatR for handling the corresponding queries and commands, 
+and it returns appropriate HTTP responses based on the operation results. ---//
+
+
+ - The Get method handles a GET request to retrieve a list of leave allocations. 
+It sends a GetLeaveAllocationListQuery request to the mediator to fetch the leave allocations 
+and returns an Ok response with the list of leave allocations.
+
+- [ProducesResponseType(201)] indicates that the method can return an HTTP response with a status code of 201 (Created) if the request is successful. This is commonly used for POST methods to indicate the successful creation of a new resource.
+
+- [ProducesResponseType(400)] indicates that the method can return an HTTP response with a status code of 400 (Bad Request) if the request is invalid or missing required parameters. It typically signifies a client error.
+
+- [ProducesResponseType(StatusCodes.Status404NotFound)] indicates that the method can return an HTTP response with a status code of 404 (Not Found) if the requested resource is not found. This is commonly used when fetching details of a specific resource using its identifier.
+
+- The Get method with the {id} parameter handles a GET request to retrieve details of a
+specific leave allocation identified by the provided id. It sends a GetLeaveAllocationDetailQuery 
+request to the mediator with the specified id and returns an Ok response with the leave allocation details.
+
+- The Post method handles a POST request to create a new leave allocation. It expects a CreateLeaveAllocationCommand object 
+in the request body, which contains the necessary information for creating the leave allocation. It sends the command to the mediator, 
+and upon successful creation, it returns a Created response with the location of the newly created resource.
+
+- The Put method handles a PUT request to update an existing leave allocation. It expects an UpdateLeaveAllocationCommand 
+object in the request body, which contains the updated information for the leave allocation identified by the provided id. 
+It sends the command to the mediator, and if the update is successful, it returns a NoContent response indicating a successful update.
+
+- The Delete method with the {id} parameter handles a DELETE request to remove a leave allocation identified by the provided id.
+It creates a DeleteLeaveAllocationCommand object with the specified id, sends the command to the mediator, 
+and upon successful deletion, it returns a NoContent response indicating a successful deletion.
+ */
+
+
 
 namespace HR.LeaveManagement.Api.Controllers;
 
